@@ -313,7 +313,6 @@ def dctcp():
     # Run the experiment for the specified time
     start_time = time()
     while True:
-        sleep(5)
         now = time()
         delta = now - start_time
         if delta > args.time:
