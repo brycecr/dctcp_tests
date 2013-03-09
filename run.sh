@@ -3,7 +3,8 @@ mn -c
 apt-get install mutt
 echo ""
 echo "The test takes some time to run (approx 30 minutes), give us your email id
-and we will mail you the results :) (Example : \"gmail@rajnikanth.com\" )"
+and we will mail you the results :) (Example : \"gmail@rajnikanth.com\"  without
+the quotes)"
 echo "IMPORTANT : Take the much needed break before the finals, this is going to
 take some time : "
 read email
