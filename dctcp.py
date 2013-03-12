@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-"CS244 Spring 2013 Assignment 1: Bufferbloat"
+"CS244 Winter 2013 Assignment 3: DCTCP"
 
 from mininet.topo import Topo
 from mininet.node import CPULimitedHost
