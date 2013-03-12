@@ -14,12 +14,17 @@ using the command below :
   git clone
   https://prachetaa@bitbucket.org/prachetaa/cs244_dctcp_win13.git
 
-* Run the command .sudo ./run.sh. for replicating all figures
-except for throughput vs N graph. (Takes about 30 minutes to
+* We give you the option of reproducing all the figures (including
+  the throughput vs N ) or just the figures of the paper. Hence, we
+  have two scripts, run_extended that reproduces all the figures
+  and run.sh that reproduces figures from the paper only.
+
+ Run the command .sudo ./run_extended.sh. for
+replicating all figures. (Takes about 50 minutes to
 complete)
 
-* Run the command .sudo ./run_extended.sh. for
-replicating all figures. (Takes about 50 minutes to
+  Run the command .sudo ./run.sh. for replicating all figures
+except for throughput vs N graph. (Takes about 30 minutes to
 complete)
 
 * Do not close the terminal running the experiments as they
