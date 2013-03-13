@@ -16,7 +16,7 @@ def cprint(s, color, cr=True):
         
 # Topology to be instantiated in Mininet
 class StarTopo(Topo):
-    "Star topology for Buffer Sizing experiment"
+    "Star topology for DCTCP experiment"
 
     def __init__(self, n=3, cpu=None, bw_host=None, bw_net=None,
                  delay=None, maxq=None, enable_dctcp=None, enable_red=None,
