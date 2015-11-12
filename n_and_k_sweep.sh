@@ -24,7 +24,7 @@ for qsize in 200; do
 	for k in 5 10 15 20 40; do
 	    dctcp_red_min=`expr $k \\* $dctcp_red_avpkt`
 	    dctcp_red_max=`expr $dctcp_red_min + 1`
-	    python dctcp.py --delay $delay -b $bwnet -B $bwnet -k $k -d $dir1 --maxq $qsize -t $time \
+	    ./bin/python dctcp.py --delay $delay -b $bwnet -B $bwnet -k $k -d $dir1 --maxq $qsize -t $time \
 	    --red_limit $dctcp_red_limit \
 	    --red_min $dctcp_red_min \
 	    --red_max $dctcp_red_max \
@@ -37,6 +37,6 @@ for qsize in 200; do
 	done
     done
 done
-python plot_k_sweep.py -f dctcpbb-h3/k.txt dctcpbb-h5/k.txt dctcpbb-h7/k.txt \
+./bin/python plot_k_sweep.py -f dctcpbb-h3/k.txt dctcpbb-h5/k.txt dctcpbb-h7/k.txt \
 dctcpbb-h9/k.txt dctcpbb-h10/k.txt -l 3hosts 5hosts 7hosts 9hosts 10hosts -o $dirf/n_and_k_sweep.png
 rm -rf dctcpbb-h*

@@ -23,7 +23,7 @@ for qsize in 200; do
     rm -rf tcpbb-q$qsize
     dirf=dctcpgraphs-q$qsize
     dir1=dctcpbb-q$qsize
-    python dctcp.py --delay $delay -b $bwnet -B $bwnet -d $dir1 --maxq $qsize -t $time \
+    ./bin/python dctcp.py --delay $delay -b $bwnet -B $bwnet -d $dir1 --maxq $qsize -t $time \
     --red_limit $dctcp_red_limit \
     --red_min $dctcp_red_min \
     --red_max $dctcp_red_max \
@@ -34,10 +34,10 @@ for qsize in 200; do
     --red 0 \
     --iperf $iperf -k 0 -n 3
     dir2=tcpbb-q$qsize
-    python dctcp.py --delay $delay -b 100 -d $dir2 --maxq $qsize -t $time \
+    ./bin/python dctcp.py --delay $delay -b 100 -d $dir2 --maxq $qsize -t $time \
     --dctcp 0 --red 0 --iperf $iperf -k 0 -n 3
     #python plot_tcpprobe.py -f $dir1/cwnd.txt $dir2/cwnd.txt -o $dirf/cwnd-iperf.png -p $iperf_port
-    python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend dctcp tcp -o \
+    ./bin/python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend dctcp tcp -o \
     $dirf/dctcp_tcp_queue.png
     rm -rf $dir1 $dir2
     #python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png

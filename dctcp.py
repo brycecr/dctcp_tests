@@ -188,7 +188,7 @@ parser.add_argument('--cong',
 # Expt parameters
 args = parser.parse_args()
 
-CUSTOM_IPERF_PATH = args.iperf
+CUSTOM_IPERF_PATH = '/usr/bin/iperf'
 assert(os.path.exists(CUSTOM_IPERF_PATH))
 
 if not os.path.exists(args.dir):
@@ -207,13 +207,13 @@ def stop_tcpprobe():
 
 # Enable DCTCP and ECN in the Linux Kernel
 def SetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_dctcp_enable=1", shell=True).wait()
+   Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
 
 # Disable DCTCP and ECN in the Linux Kernel
 def ResetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_dctcp_enable=0", shell=True).wait()
-   Popen("sysctl -w net.ipv4.tcp_ecn=0", shell=True).wait()
+   Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
+   Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
 
 # Monitor the queue occupancy 
 def start_qmon(iface, interval_sec=0.5, outfile="q.txt"):
@@ -250,10 +250,19 @@ def median(l):
 # Set the speed of an interface
 def set_speed(iface, spd):
     "Change htb maximum rate for interface"
-    cmd = ("tc class change dev %s parent 1:0 classid 1:1 "
+    cmd = ("tc class change dev %s parent 5:0 classid 5:1 "
                "htb rate %s burst 15k" % (iface, spd))
     os.system(cmd)
 
+# Set the red parameters correctly
+#def set_red(iface, red_params):
+#    "Change RED params for interface"
+#    cmd = ("tc qdisc change dev %s parent 5:1 handle 6: "
+#           "red limit %s min %s max %s avpkt %s "
+#           "burst %s probability %s" % (iface, red_params['limit'], 
+#               red_params['min'], red_params['max'], red_params['avpkt'],
+#               red_params['burst'], red_params['prob']))
+#    os.system(cmd)
 
 def dctcp():
     if not os.path.exists(args.dir):
@@ -296,9 +305,15 @@ def dctcp():
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
     iface="s0-eth1"
+    print (topo.port('s0','h0'))
+    print (net.getNodeByName('s0').intf('lo'))
+    print ("I just printed the first switch")
     set_speed(iface, "2Gbit")
+    print ("part 1")
     start_receiver(net)
+    print ("part 2")
     start_senders(net)
+    print ("part 3")
     sleep(5)
     set_speed(iface, "%.2fMbit" % args.bw_net)
     # Let the experiment stabilize initially
