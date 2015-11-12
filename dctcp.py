@@ -255,14 +255,14 @@ def set_speed(iface, spd):
     os.system(cmd)
 
 # Set the red parameters correctly
-#def set_red(iface, red_params):
-#    "Change RED params for interface"
-#    cmd = ("tc qdisc change dev %s parent 5:1 handle 6: "
-#           "red limit %s min %s max %s avpkt %s "
-#           "burst %s probability %s" % (iface, red_params['limit'], 
-#               red_params['min'], red_params['max'], red_params['avpkt'],
-#               red_params['burst'], red_params['prob']))
-#    os.system(cmd)
+def set_red(iface, red_params):
+    "Change RED params for interface"
+    cmd = ("tc qdisc change dev %s parent 5:1 handle 6: "
+           "red limit %s min %s max %s avpkt %s "
+           "burst %s probability %s" % (iface, red_params['limit'], 
+               red_params['min'], red_params['max'], red_params['avpkt'],
+               red_params['burst'], red_params['prob']))
+    os.system(cmd)
 
 def dctcp():
     if not os.path.exists(args.dir):
@@ -305,6 +305,7 @@ def dctcp():
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
     iface="s0-eth1"
+    set_red(iface, red_settings)
     print (topo.port('s0','h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
