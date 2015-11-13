@@ -9,12 +9,10 @@ from mininet.net import Mininet
 from mininet.log import lg, info
 from mininet.util import dumpNodeConnections
 from mininet.cli import CLI
-
 from subprocess import Popen, PIPE
 from time import sleep, time
 from multiprocessing import Process
 from argparse import ArgumentParser
-
 from monitor import monitor_qlen
 from startopo import StarTopo
 import termcolor as T
@@ -37,6 +35,7 @@ SAMPLE_PERIOD_SEC = 1.0
 # Time to wait for first sample, in seconds, as a float.
 SAMPLE_WAIT_SEC = 3.0
 
+
 def cprint(s, color, cr=True):
     """Print in color
        s: string to print
@@ -45,6 +44,7 @@ def cprint(s, color, cr=True):
         print T.colored(s, color)
     else:
         print T.colored(s, color),
+
 
 # Get the number of bytes on that particular interface
 def get_txbytes(iface):
@@ -58,7 +58,7 @@ def get_txbytes(iface):
         raise Exception("could not find iface %s in /proc/net/dev:%s" %
                         (iface, lines))
     # Extract TX bytes from:
-    #Inter-|   Receive                                                |  Transmit
+    # Inter-|   Receive                                                |  Transmit
     # face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
     # lo: 6175728   53444    0    0    0     0          0         0  6175728   53444    0    0    0     0       0          0
     return float(line.split()[9])
@@ -81,7 +81,7 @@ def get_rates(iface, nsamples=NSAMPLES, period=SAMPLE_PERIOD_SEC,
         txbytes = get_txbytes(iface)
         now = time()
         elapsed = now - last_time
-        #if last_time:
+        # if last_time:
         #    print "elapsed: %0.4f" % (now - last_time)
         last_time = now
         # Get rate in Mbps; correct for elapsed time.
@@ -94,6 +94,7 @@ def get_rates(iface, nsamples=NSAMPLES, period=SAMPLE_PERIOD_SEC,
         sys.stdout.flush()
         sleep(period)
     return ret
+
 
 # Parsing arguments for the code
 parser = ArgumentParser(description="Bufferbloat tests")
@@ -133,43 +134,43 @@ parser.add_argument('--maxq',
 
 # RED Parameters 
 parser.add_argument('--mark_threshold', '-k',
-		    help="Marking threshold",
-		    type=int,
-		    default="20")
+                    help="Marking threshold",
+                    type=int,
+                    default="20")
 
 parser.add_argument('--red_limit',
-		    help="RED limit",
-		    default="1000000")
+                    help="RED limit",
+                    default="1000000")
 
 parser.add_argument('--red_min',
-		    help="RED min marking threshold",
-		    default="20000")
+                    help="RED min marking threshold",
+                    default="20000")
 
 parser.add_argument('--red_max',
-		    help="RED max marking threshold",
-		    default="25000")
+                    help="RED max marking threshold",
+                    default="25000")
 
 parser.add_argument('--red_avpkt',
-		    help="RED average packet size",
-		    default="1000")
+                    help="RED average packet size",
+                    default="1000")
 
 parser.add_argument('--red_burst',
-		    help="RED burst size",
-		    default="20") 
+                    help="RED burst size",
+                    default="20")
 
 parser.add_argument('--red_prob',
-		    help="RED marking probability",
-		    default="1")
+                    help="RED marking probability",
+                    default="1")
 
 parser.add_argument('--dctcp',
-		    help="Enable DCTCP",
-		    type=int,
-		    default="0")
+                    help="Enable DCTCP",
+                    type=int,
+                    default="0")
 
 parser.add_argument('--red',
-		    help="Enable RED",
-		    type=int,
-		    default="0")
+                    help="Enable RED",
+                    type=int,
+                    default="0")
 
 parser.add_argument('--iperf',
                     dest="iperf",
@@ -189,10 +190,11 @@ parser.add_argument('--cong',
 args = parser.parse_args()
 
 CUSTOM_IPERF_PATH = '/usr/bin/iperf'
-assert(os.path.exists(CUSTOM_IPERF_PATH))
+assert (os.path.exists(CUSTOM_IPERF_PATH))
 
 if not os.path.exists(args.dir):
     os.makedirs(args.dir)
+
 
 # Simple wrappers around monitoring utilities.  You are welcome to
 # contribute neatly written (using classes) monitoring scripts for
@@ -202,25 +204,30 @@ def start_tcpprobe(outfile="cwnd.txt"):
     Popen("cat /proc/net/tcpprobe > %s/%s" % (args.dir, outfile),
           shell=True)
 
+
 def stop_tcpprobe():
     Popen("killall -9 cat", shell=True).wait()
 
+
 # Enable DCTCP and ECN in the Linux Kernel
 def SetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
-   Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
+
 
 # Disable DCTCP and ECN in the Linux Kernel
 def ResetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
-   Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
 
-# Monitor the queue occupancy 
+
+# Monitor the queue occupancy
 def start_qmon(iface, interval_sec=0.5, outfile="q.txt"):
     monitor = Process(target=monitor_qlen,
                       args=(iface, interval_sec, outfile))
     monitor.start()
     return monitor
+
 
 # Start the receiver of the flows, its fixed to be h0 here
 def start_receiver(net):
@@ -228,13 +235,15 @@ def start_receiver(net):
     print "Starting iperf server..."
     server = h0.popen("%s -s -w 16m" % CUSTOM_IPERF_PATH)
 
+
 # Start senders sending traffic to receiver h0
 def start_senders(net):
     h0 = net.getNodeByName('h0')
-    for i in range(args.hosts-1):
-	print "Starting iperf client..."
-	hn = net.getNodeByName('h%d' %(i+1))
-	client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000")
+    for i in range(args.hosts - 1):
+        print "Starting iperf client..."
+        hn = net.getNodeByName('h%d' % (i + 1))
+        client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000")
+
 
 # Function to compute the median
 def median(l):
@@ -247,22 +256,25 @@ def median(l):
         upper = s[len(l) / 2]
         return float(lower + upper) / 2
 
+
 # Set the speed of an interface
 def set_speed(iface, spd):
     "Change htb maximum rate for interface"
     cmd = ("tc class change dev %s parent 5:0 classid 5:1 "
-               "htb rate %s burst 15k" % (iface, spd))
+           "htb rate %s burst 15k" % (iface, spd))
     os.system(cmd)
+
 
 # Set the red parameters correctly
 def set_red(iface, red_params):
     "Change RED params for interface"
     cmd = ("tc qdisc change dev %s parent 5:1 handle 6: "
            "red limit %s min %s max %s avpkt %s "
-           "burst %s probability %s" % (iface, red_params['limit'], 
-               red_params['min'], red_params['max'], red_params['avpkt'],
-               red_params['burst'], red_params['prob']))
+           "burst %s probability %s" % (iface, red_params['limit'],
+                                        red_params['min'], red_params['max'], red_params['avpkt'],
+                                        red_params['burst'], red_params['prob']))
     os.system(cmd)
+
 
 def dctcp():
     if not os.path.exists(args.dir):
@@ -270,10 +282,10 @@ def dctcp():
     os.system("sudo sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong)
     if (args.dctcp):
         SetDCTCPState()
-	edctcp=1
+        edctcp = 1
     else:
         ResetDCTCPState()
-	edctcp=0
+        edctcp = 0
 
     # Set the red parameters passed to this code, otherwise use the default
     # settings that are set in Mininet code.
@@ -285,16 +297,16 @@ def dctcp():
     red_settings['burst'] = args.red_burst
     red_settings['prob'] = args.red_prob
     # Instantiate the topology using the require parameters
-    topo = StarTopo(n=args.hosts, bw_host=args.bw_host, 
-	            delay='%sms' % args.delay,
-		    bw_net=args.bw_net,
-		    maxq=args.maxq,
-		    enable_dctcp=edctcp,
-		    enable_red=args.red,
-		    red_params=red_settings,
-		    show_mininet_commands=0)
+    topo = StarTopo(n=args.hosts, bw_host=args.bw_host,
+                    delay='%sms' % args.delay,
+                    bw_net=args.bw_net,
+                    maxq=args.maxq,
+                    enable_dctcp=edctcp,
+                    enable_red=args.red,
+                    red_params=red_settings,
+                    show_mininet_commands=0)
     net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink,
- 		 autoPinCpus=True)
+                  autoPinCpus=True)
     net.start()
     # This dumps the topology and how nodes are interconnected through
     # links.
@@ -304,9 +316,9 @@ def dctcp():
 
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
-    iface="s0-eth1"
+    iface = "s0-eth1"
     set_red(iface, red_settings)
-    print (topo.port('s0','h0'))
+    print (topo.port('s0', 'h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
     set_speed(iface, "2Gbit")
@@ -333,20 +345,20 @@ def dctcp():
         delta = now - start_time
         if delta > args.time:
             break
-        #print "%.1fs left..." % (args.time - delta)
+            # print "%.1fs left..." % (args.time - delta)
 
     # If the experiment involves marking bandwidth for different threshold
     # then get the rate of the bottlenect link
-    if(args.mark_threshold):
-	rates = get_rates(iface='s0-eth1', nsamples=CALIBRATION_SAMPLES+CALIBRATION_SKIP)
-	rates = rates[CALIBRATION_SKIP:]
-	reference_rate = median(rates)
-	if (reference_rate > 20):
-	    with open(args.dir+"/k.txt", "a") as myfile:
-		myfile.write(str(args.mark_threshold)+",")
-		myfile.write(str(reference_rate))
-		myfile.write("\n")
-		myfile.close()
+    if (args.mark_threshold):
+        rates = get_rates(iface='s0-eth1', nsamples=CALIBRATION_SAMPLES + CALIBRATION_SKIP)
+        rates = rates[CALIBRATION_SKIP:]
+        reference_rate = median(rates)
+        if (reference_rate > 20):
+            with open(args.dir + "/k.txt", "a") as myfile:
+                myfile.write(str(args.mark_threshold) + ",")
+                myfile.write(str(reference_rate))
+                myfile.write("\n")
+                myfile.close()
 
     stop_tcpprobe()
     qmon.terminate()
@@ -355,5 +367,6 @@ def dctcp():
     # Sometimes they require manual killing.
     Popen("pgrep -f webserver.py | xargs kill -9", shell=True).wait()
 
+
 if __name__ == "__main__":
-    dctcp ()
+    dctcp()

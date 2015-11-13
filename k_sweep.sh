@@ -5,7 +5,7 @@
 
 time=30
 bwnet=100
-delay=1
+delay=40
 
 # Red settings (for DCTCP)
 dctcp_red_limit=1000000
@@ -31,10 +31,10 @@ for qsize in 200; do
         --red_burst $dctcp_red_burst \
         --red_prob $dctcp_red_prob \
         --dctcp 1 \
-	--red 0\
+	--red 1\
         --iperf $iperf -n 3
     done
 done
 
 ./bin/python plot_k_sweep.py -f $dir1/k.txt -l Ksweep -o $dirf/k_sweep.png
-rm -rf $dir1
+#rm -rf $dir1
