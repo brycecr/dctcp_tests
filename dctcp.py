@@ -317,7 +317,7 @@ def dctcp():
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
     iface = "s0-eth1"
-    set_red(iface, red_settings)
+    #set_red(iface, red_settings)
     print (topo.port('s0', 'h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
