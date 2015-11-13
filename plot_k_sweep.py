@@ -74,7 +74,7 @@ for i, f in enumerate(args.files):
     ax.plot(xaxis, qlens, marker='o', lw=2, **get_style(i))
     ax.xaxis.set_major_locator(MaxNLocator(4))
 
-plt.legend(args.legend, 'lower right')
+plt.legend(args.legend, loc='lower right')
 plt.ylim([0,101])
 plt.ylabel("Throughput (Mbps)")
 plt.grid(True)

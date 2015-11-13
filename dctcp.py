@@ -6,9 +6,10 @@ from mininet.topo import Topo
 from mininet.node import CPULimitedHost
 from mininet.link import TCLink
 from mininet.net import Mininet
-from mininet.log import lg, info
+from mininet.log import lg, info, debug
 from mininet.util import dumpNodeConnections
 from mininet.cli import CLI
+from mininet.log import setLogLevel
 
 from subprocess import Popen, PIPE
 from time import sleep, time
@@ -207,13 +208,13 @@ def stop_tcpprobe():
 
 # Enable DCTCP and ECN in the Linux Kernel
 def SetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_dctcp_enable=1", shell=True).wait()
+   Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
 
 # Disable DCTCP and ECN in the Linux Kernel
 def ResetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_dctcp_enable=0", shell=True).wait()
-   Popen("sysctl -w net.ipv4.tcp_ecn=0", shell=True).wait()
+   Popen("sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong, shell=True).wait()
+   Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
 
 # Monitor the queue occupancy 
 def start_qmon(iface, interval_sec=0.5, outfile="q.txt"):
@@ -250,8 +251,17 @@ def median(l):
 # Set the speed of an interface
 def set_speed(iface, spd):
     "Change htb maximum rate for interface"
-    cmd = ("tc class change dev %s parent 1:0 classid 1:1 "
+    cmd = ("tc class change dev %s parent 5:0 classid 5:1 "
                "htb rate %s burst 15k" % (iface, spd))
+    os.system(cmd)
+
+# Set the red parameters correctly
+def set_red(iface, red_params):
+    "Change RED params for interface"
+    cmd = ("tc qdisc change dev %s parent 5:1 handle 6: "
+           "red limit %s min %s max %s avpkt %s "
+	   "burst %s bandwidth 100Mbit probability %s ecn" % (iface, red_params['limit'], red_params['min'], red_params['max'], red_params['avpkt'], red_params['burst'], red_params['prob']))
+    print cmd
     os.system(cmd)
 
 
@@ -286,21 +296,31 @@ def dctcp():
 		    show_mininet_commands=0)
     net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink,
  		 autoPinCpus=True)
+    if (args.dctcp):
+        SetDCTCPState()
+        edctcp=1
+    else:
+        ResetDCTCPState()
+        edctcp=0
+
+
     net.start()
     # This dumps the topology and how nodes are interconnected through
     # links.
     dumpNodeConnections(net.hosts)
     # This performs a basic all pairs ping test.
     net.pingAll()
+    iface="s0-eth1"
+    set_red(iface,red_settings)
+    os.system("tc -d qdisc show dev %s" % iface)
 
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
-    iface="s0-eth1"
-    set_speed(iface, "2Gbit")
+    #set_speed(iface, "2Gbit")
     start_receiver(net)
     start_senders(net)
     sleep(5)
-    set_speed(iface, "%.2fMbit" % args.bw_net)
+    #set_speed(iface, "%.2fMbit" % args.bw_net)
     # Let the experiment stabilize initially
     sleep(20)
 
@@ -340,4 +360,5 @@ def dctcp():
     Popen("pgrep -f webserver.py | xargs kill -9", shell=True).wait()
 
 if __name__ == "__main__":
+    #   setLogLevel('debug')
     dctcp ()

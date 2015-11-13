@@ -58,7 +58,7 @@ class StarTopo(Topo):
                             'show_commands': self.show_mininet_commands}                            
         lconfig_switch = {'bw': self.bw_net, 'delay': 0,
                             'max_queue_size': self.maxq,
-                            'enable_ecn': 1 if self.enable_dctcp else 0,
+                            'enable_ecn': 1 if self.enable_dctcp else 1,
                             'enable_red': 1 if self.enable_red else 0,
                             'red_params': self.red_params if ( (self.enable_red or self.enable_dctcp) 
 						and self.red_params != None) else None,

@@ -83,7 +83,7 @@ for i, f in enumerate(args.files):
     ax.plot(qlens, cdf, lw=2)
     #ax.xaxis.set_major_locator(MaxNLocator(4))
 
-plt.legend(args.legend, 'upper center')
+plt.legend(args.legend, loc='upper center')
 plt.ylabel("CDF")
 plt.ylim((0,1))
 plt.grid(True)
