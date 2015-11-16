@@ -218,7 +218,7 @@ def SetDCTCPState():
 # Disable DCTCP and ECN in the Linux Kernel
 def ResetDCTCPState():
     Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
-    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_ecn=0", shell=True).wait()
 
 
 # Monitor the queue occupancy
@@ -270,7 +270,7 @@ def set_red(iface, red_params):
     "Change RED params for interface"
     cmd = ("tc qdisc change dev %s parent 5:1 handle 6: "
            "red limit %s min %s max %s avpkt %s "
-           "burst %s probability %s" % (iface, red_params['limit'],
+           "ecn burst %s probability %s" % (iface, red_params['limit'],
                                         red_params['min'], red_params['max'], red_params['avpkt'],
                                         red_params['burst'], red_params['prob']))
     os.system(cmd)
@@ -317,7 +317,7 @@ def dctcp():
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
     iface = "s0-eth1"
-    #set_red(iface, red_settings)
+    set_red(iface, red_settings)
     print (topo.port('s0', 'h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
