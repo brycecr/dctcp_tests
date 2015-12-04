@@ -20,7 +20,8 @@ for qsize in 200; do
     rm -rf dctcpbb-q$qsize
     mkdir dctcpbb-q$qsize
     dir1=dctcpbb-q$qsize
-    for k in 3 5 9 15 20 30 40 60 80 100; do
+    #for k in 3 5 9 15 20 30 40 60 80 100; do
+    for k in 3 5 9; do
         dctcp_red_min=`expr $k \\* $dctcp_red_avpkt`
 	echo "$k"
 	echo "$dctcp_red_min"
@@ -39,4 +40,4 @@ for qsize in 200; do
 done
 
 ./bin/python plot_k_sweep.py -f $dir1/k.txt -l Ksweep -o $dirf/k_sweep.png
-#rm -rf $dir1
+rm -rf $dir1
