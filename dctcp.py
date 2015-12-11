@@ -1,4 +1,4 @@
-#!/usr/bin/python
+
 
 "CS244 Winter 2013 Assignment 3: DCTCP"
 
@@ -67,7 +67,6 @@ def get_txbytes(iface):
 def get_rates(iface, nsamples=NSAMPLES, period=SAMPLE_PERIOD_SEC,
               wait=SAMPLE_WAIT_SEC):
     """Returns the interface @iface's current utilization in Mb/s.  It
-    returns @nsamples samples, and each sample is the average
     utilization measured over @period time.  Before measuring it waits
     for @wait seconds to 'warm up'."""
     # Returning nsamples requires one extra to start the timer.
@@ -211,13 +210,13 @@ def stop_tcpprobe():
 
 # Enable DCTCP and ECN in the Linux Kernel
 def SetDCTCPState():
-    Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
-    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_congestion_control=reno", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_ecn=0", shell=True).wait()
 
 
 # Disable DCTCP and ECN in the Linux Kernel
 def ResetDCTCPState():
-    Popen("sysctl -w net.ipv4.tcp_congestion_control=dctcp", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_congestion_control=reno", shell=True).wait()
     Popen("sysctl -w net.ipv4.tcp_ecn=0", shell=True).wait()
 
 
@@ -296,6 +295,7 @@ def dctcp():
     red_settings['avpkt'] = args.red_avpkt
     red_settings['burst'] = args.red_burst
     red_settings['prob'] = args.red_prob
+    print red_settings
     # Instantiate the topology using the require parameters
     topo = StarTopo(n=args.hosts, bw_host=args.bw_host,
                     delay='%sms' % args.delay,
@@ -317,11 +317,11 @@ def dctcp():
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
     iface = "s0-eth1"
-    set_red(iface, red_settings)
+    #set_red(iface, red_settings)
     print (topo.port('s0', 'h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
-    set_speed(iface, "2Gbit")
+ #   set_speed(iface, "2Gbit")
     print ("part 1")
     start_receiver(net)
     print ("part 2")
@@ -353,7 +353,7 @@ def dctcp():
         rates = get_rates(iface='s0-eth1', nsamples=CALIBRATION_SAMPLES + CALIBRATION_SKIP)
         rates = rates[CALIBRATION_SKIP:]
         reference_rate = median(rates)
-        if True:#(reference_rate > 20):
+        if (reference_rate > 20):
 	    print "I AM OPENING KTXT"
             with open(args.dir + "/k.txt", "a") as myfile:
                 myfile.write(str(args.mark_threshold) + ",")
