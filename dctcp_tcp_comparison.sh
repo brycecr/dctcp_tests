@@ -4,7 +4,7 @@
 # using sudo.
 
 time=12
-bwnet=100
+bwnet=1
 delay=0.25
 
 # Red settings (for DCTCP)
@@ -34,7 +34,7 @@ for qsize in 200; do
     --red 0 \
     --iperf $iperf -k 0 -n 3
     dir2=tcpbb-q$qsize
-    ./bin/python dctcp.py --delay $delay -b 100 -d $dir2 --maxq $qsize -t $time \
+    ./bin/python dctcp.py --delay $delay -b $bwnet -B $bwnet -d $dir2 --maxq $qsize -t $time \
     --dctcp 0 --red 0 --iperf $iperf -k 0 -n 3
     #python plot_tcpprobe.py -f $dir1/cwnd.txt $dir2/cwnd.txt -o $dirf/cwnd-iperf.png -p $iperf_port
     ./bin/python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend dctcp tcp -o \

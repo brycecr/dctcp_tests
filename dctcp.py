@@ -211,7 +211,7 @@ def stop_tcpprobe():
 # Enable DCTCP and ECN in the Linux Kernel
 def SetDCTCPState():
     Popen("sysctl -w net.ipv4.tcp_congestion_control=reno", shell=True).wait()
-    Popen("sysctl -w net.ipv4.tcp_ecn=0", shell=True).wait()
+    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
 
 
 # Disable DCTCP and ECN in the Linux Kernel
@@ -221,7 +221,7 @@ def ResetDCTCPState():
 
 
 # Monitor the queue occupancy
-def start_qmon(iface, interval_sec=0.5, outfile="q.txt"):
+def start_qmon(iface, interval_sec=0.01, outfile="q.txt"):
     monitor = Process(target=monitor_qlen,
                       args=(iface, interval_sec, outfile))
     monitor.start()
@@ -229,18 +229,20 @@ def start_qmon(iface, interval_sec=0.5, outfile="q.txt"):
 
 
 # Start the receiver of the flows, its fixed to be h0 here
-def start_receiver(net):
+def start_receiver(net, ecn):
     h0 = net.getNodeByName('h0')
+    h0.popen("sysctl -w net.ipv4.tcp_ecn=%u" % ecn)
     print "Starting iperf server..."
     server = h0.popen("%s -s -w 16m" % CUSTOM_IPERF_PATH)
 
 
 # Start senders sending traffic to receiver h0
-def start_senders(net):
+def start_senders(net, ecn):
     h0 = net.getNodeByName('h0')
     for i in range(args.hosts - 1):
         print "Starting iperf client..."
         hn = net.getNodeByName('h%d' % (i + 1))
+        hn.popen("sysctl -w net.ipv4.tcp_ecn=%u" % ecn)
         client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000")
 
 
@@ -284,7 +286,7 @@ def dctcp():
         edctcp = 1
     else:
         ResetDCTCPState()
-        edctcp = 0
+        edctcp = 1
 
     # Set the red parameters passed to this code, otherwise use the default
     # settings that are set in Mininet code.
@@ -318,17 +320,23 @@ def dctcp():
     # speed of the bottleneck link to the original passed value
     iface = "s0-eth1"
     #set_red(iface, red_settings)
+    eecn = 0
+    if (args.dctcp):
+	eecn = 1
     print (topo.port('s0', 'h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
- #   set_speed(iface, "2Gbit")
+    #set_speed(iface, "2Gbit")
+    #set_speed(iface, "10Kbit")
+    os.system("sudo wireshark") 
+    sleep(20)
     print ("part 1")
-    start_receiver(net)
+    start_receiver(net, eecn)
     print ("part 2")
-    start_senders(net)
+    start_senders(net, eecn)
     print ("part 3")
     sleep(5)
-    set_speed(iface, "%.2fMbit" % args.bw_net)
+    #set_speed(iface, "%.2fMbit" % args.bw_net)
     # Let the experiment stabilize initially
     sleep(20)
 
