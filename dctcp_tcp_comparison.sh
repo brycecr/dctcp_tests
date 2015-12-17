@@ -4,7 +4,7 @@
 # using sudo.
 
 time=12
-bwnet=1
+bwnet=100
 delay=0.25
 
 # Red settings (for DCTCP)
