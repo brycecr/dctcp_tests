@@ -221,7 +221,7 @@ def ResetDCTCPState():
 
 
 # Monitor the queue occupancy
-def start_qmon(iface, interval_sec=0.0001, outfile="q.txt"):
+def start_qmon(iface, interval_sec=0.001, outfile="q.txt"):
     monitor = Process(target=monitor_qlen,
                       args=(iface, interval_sec, outfile))
     monitor.start()
@@ -330,7 +330,7 @@ def dctcp():
     #set_speed(iface, "10Kbit")
     if (eecn == 1):
         os.system("sudo wireshark &") 
-        sleep(20)
+    	sleep(20)
     print ("part 1")
     start_receiver(net, eecn)
     print ("part 2")
