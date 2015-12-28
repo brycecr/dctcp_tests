@@ -70,7 +70,7 @@ for i, f in enumerate(args.files):
     ax.xaxis.set_major_locator(MaxNLocator(4))
 
 plt.legend(args.legend)
-plt.ylabel("Queue occupancy (packets)")
+plt.ylabel("Queue occupancy (bytes)")
 plt.grid(True)
 plt.xlabel("Time elapsed (in sec)")
 

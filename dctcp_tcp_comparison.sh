@@ -36,8 +36,9 @@ for qsize in 200; do
     dir2=tcpbb-q$qsize
     ./bin/python dctcp.py --delay $delay -b $bwnet -B $bwnet -d $dir2 --maxq $qsize -t $time \
     --dctcp 0 --red 0 --iperf $iperf -k 0 -n 3
-    #python plot_tcpprobe.py -f $dir1/cwnd.txt $dir2/cwnd.txt -o $dirf/cwnd-iperf.png -p $iperf_port
-    ./bin/python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend dctcp tcp -o \
+    python plot_tcpprobe.py -f $dir1/cwnd.txt -o $dirf/cwnd-1-iperf.png -p $iperf_port
+    python plot_tcpprobe.py -f $dir2/cwnd.txt -o $dirf/cwnd-2-iperf.png -p $iperf_port
+    ./bin/python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend tcpFakEcn tcp -o \
     $dirf/dctcp_tcp_queue.png
     rm -rf $dir1 $dir2
     #python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png

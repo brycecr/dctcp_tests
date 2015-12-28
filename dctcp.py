@@ -328,15 +328,15 @@ def dctcp():
     print ("I just printed the first switch")
     #set_speed(iface, "2Gbit")
     #set_speed(iface, "10Kbit")
-    if (eecn == 1):
-        os.system("sudo wireshark &") 
-    	sleep(20)
+  #  if (eecn == 1):
+  #      os.system("sudo wireshark &") 
+  #  	sleep(20)
     print ("part 1")
     start_receiver(net, eecn)
     print ("part 2")
     start_senders(net, eecn)
     print ("part 3")
-    sleep(5)
+   # sleep(5)
     #set_speed(iface, "%.2fMbit" % args.bw_net)
     # Let the experiment stabilize initially
     sleep(20)
