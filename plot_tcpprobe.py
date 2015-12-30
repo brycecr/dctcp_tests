@@ -27,7 +27,8 @@ Sample line:
 def parse_file(f):
     times = defaultdict(list)
     cwnd = defaultdict(list)
-    srtt = []
+    rwin = defaultdict(list)
+    #srtt = []
     for l in open(f).xreadlines():
         fields = l.strip().split(' ')
         if len(fields) != 11:
@@ -44,16 +45,31 @@ def parse_file(f):
 
         c = int(fields[6])
         cwnd[sport].append(c * 1480 / 1024.0)
-        srtt.append(int(fields[-1]))
-    return times, cwnd
+	r = int(fields[8])
+        rwin[sport].append(r);
+        #srtt.append(int(fields[9]))
+    return times, cwnd, rwin
 
 added = defaultdict(int)
 events = []
 
+def plot_rwins(ax):
+    global events
+    for f in args.files:
+        times, cwnds, rwins = parse_file(f)
+        for port in sorted(rwins.keys()):
+            t = times[port]
+            rwin = rwins[port]
+
+            events += zip(t, [port]*len(t), rwin)
+            ax.plot(t, rwin)
+
+    events.sort()
+
 def plot_cwnds(ax):
     global events
     for f in args.files:
-        times, cwnds = parse_file(f)
+        times, cwnds, rwins = parse_file(f)
         for port in sorted(cwnds.keys()):
             t = times[port]
             cwnd = cwnds[port]
@@ -104,5 +120,20 @@ if args.histogram:
 if args.out:
     print 'saving to', args.out
     plt.savefig(args.out)
+else:
+    plt.show()
+
+figRwin = plt.figure()
+axRwinPlot = figRwin.add_subplot(1, 1, 1)
+plot_rwins(axRwinPlot)
+
+axPlot.grid(True)
+axPlot.set_xlabel("seconds")
+axPlot.set_ylabel("rwin (bytes?)")
+axPlot.set_title("TCP Receive Window (RWIN) Timeseries")
+
+if args.out:
+    print 'saving to', args.out+'.rwin.png'
+    plt.savefig(args.out+'.rwin.png')
 else:
     plt.show()

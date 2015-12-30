@@ -40,6 +40,6 @@ for qsize in 200; do
     python plot_tcpprobe.py -f $dir2/cwnd.txt -o $dirf/cwnd-2-iperf.png -p $iperf_port
     ./bin/python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend tcpFakEcn tcp -o \
     $dirf/dctcp_tcp_queue.png
-    rm -rf $dir1 $dir2
+    #rm -rf $dir1 $dir2
     #python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png
 done
