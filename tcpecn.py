@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-"CS244 Winter 2013 Assignment 3: DCTCP"
+"TCP +- ECN"
 
 from mininet.topo import Topo
 from mininet.node import CPULimitedHost
@@ -118,7 +118,7 @@ parser.add_argument('--dir', '-d',
                     required=True)
 
 parser.add_argument('--hosts', '-n',
-                    help="Duration (sec) to run the experiment",
+                    help="Number of hosts",
                     type=int,
                     default=3)
 
@@ -162,8 +162,8 @@ parser.add_argument('--red_prob',
 		    help="RED marking probability",
 		    default="1")
 
-parser.add_argument('--dctcp',
-		    help="Enable DCTCP",
+parser.add_argument('--ecn',
+		    help="Enable ECN",
 		    type=int,
 		    default="0")
 
@@ -206,14 +206,14 @@ def start_tcpprobe(outfile="cwnd.txt"):
 def stop_tcpprobe():
     Popen("killall -9 cat", shell=True).wait()
 
-# Enable DCTCP and ECN in the Linux Kernel
-def SetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_congestion_control=reno", shell=True).wait()
+# Enable ECN and ECN in the Linux Kernel
+def SetECNState():
+   #Popen("sysctl -w net.ipv4.tcp_congestion_control=reno", shell=True).wait()
    Popen("sysctl -w net.ipv4.tcp_ecn=1", shell=True).wait()
 
-# Disable DCTCP and ECN in the Linux Kernel
-def ResetDCTCPState():
-   Popen("sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong, shell=True).wait()
+# Disable ECN and ECN in the Linux Kernel
+def ResetECNState():
+   #Popen("sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong, shell=True).wait()
    Popen("sysctl -w net.ipv4.tcp_ecn=0", shell=True).wait()
 
 # Monitor the queue occupancy 
@@ -266,16 +266,16 @@ def set_red(iface, red_params):
     os.system(cmd)
 
 
-def dctcp():
+def tcpecn():
     if not os.path.exists(args.dir):
         os.makedirs(args.dir)
     os.system("sudo sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong)
-    if (args.dctcp):
-        SetDCTCPState()
-	edctcp=1
-    else:
-        ResetDCTCPState()
-	edctcp=1
+    #if (args.ecn):
+    #   SetECNState()
+    #	edctcp=1
+    #else:
+    #   ResetECNState()
+    #	edctcp=1
 
     # Set the red parameters passed to this code, otherwise use the default
     # settings that are set in Mininet code.
@@ -291,18 +291,18 @@ def dctcp():
 	            delay='%sms' % args.delay,
 		    bw_net=args.bw_net,
 		    maxq=args.maxq,
-		    enable_dctcp=edctcp,
+		    enable_ecn=args.ecn,
 		    enable_red=args.red,
 		    red_params=red_settings,
 		    show_mininet_commands=0)
     net = Mininet(topo=topo, host=CPULimitedHost, link=TCLink,
  		 autoPinCpus=True)
-    if (args.dctcp):
-        SetDCTCPState()
-        edctcp=1
-    else:
-        ResetDCTCPState()
-        edctcp=1
+    #if (args.dctcp):
+    #    SetDCTCPState()
+    #    edctcp=1
+    #else:
+    #    ResetDCTCPState()
+    #    edctcp=1
 
 
     net.start()
@@ -320,7 +320,7 @@ def dctcp():
     # speed of the bottleneck link to the original passed value
     #set_speed(iface, "2Gbit")
     start_receiver(net)
-    start_senders(net,args.dctcp)
+    start_senders(net,args.ecn)
     sleep(5)
     #set_speed(iface, "%.2fMbit" % args.bw_net)
     # Let the experiment stabilize initially
@@ -363,4 +363,4 @@ def dctcp():
 
 if __name__ == "__main__":
     #   setLogLevel('debug')
-    dctcp ()
+    tcpecn()

@@ -23,6 +23,17 @@ def second(lst):
 """
 Sample line:
 2.221032535 10.0.0.2:39815 10.0.0.1:5001 32 0x1a2a710c 0x1a2a387c 11 2147483647 14592 85
+1.926909378 10.0.0.1:5001 10.0.0.3:58316 2928 0x364583d4 0x364583d4 10 2147483647 29696 4000 16776192
+Where fields are -
+1) time
+2) source ip:port
+3) dest ip:port
+4) packet lenth
+5) Next send seq #
+6) Unacked seq #
+7) cwnd
+8) ssthresh
+9) send window
 """
 def parse_file(f):
     times = defaultdict(list)
@@ -30,7 +41,7 @@ def parse_file(f):
     srtt = []
     for l in open(f).xreadlines():
         fields = l.strip().split(' ')
-        if len(fields) != 10:
+        if len(fields) != 11:
             break
         if not args.sport:
             if fields[2].split(':')[1] != args.port:
