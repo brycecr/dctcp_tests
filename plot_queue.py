@@ -54,7 +54,7 @@ def get_style(i):
     else:
         return {'color': 'blue', 'ls': '-.'}
 
-m.rc('figure', figsize=(16, 6))
+m.rc('figure', figsize=(16, 7))
 fig = figure()
 ax = fig.add_subplot(111)
 for i, f in enumerate(args.files):

@@ -186,6 +186,19 @@ parser.add_argument('--cong',
                     help="Congestion control algorithm to use",
                     default="reno")
 
+parser.add_argument('--cong1',
+                    help="Congestion control algorithm to use",
+                    default="reno")
+
+parser.add_argument('--congrest',
+                    help="Congestion control algorithm to use",
+                    default="reno")
+
+parser.add_argument('--ecnrest',
+                    help="Congestion control algorithm to use",
+		    type=int,
+                    default="2")
+
 # Expt parameters
 args = parser.parse_args()
 
@@ -230,14 +243,20 @@ def start_receiver(net):
     server = h0.popen("%s -s -w 16m" % CUSTOM_IPERF_PATH)
 
 # Start senders sending traffic to receiver h0
-def start_senders(net,ecn,algo):
+def start_senders(net,ecn1,ecnrest,algo1,algorest):
     h0 = net.getNodeByName('h0')
     for i in range(args.hosts-1):
 	print "Starting iperf client..."
 	hn = net.getNodeByName('h%d' %(i+1))
+	if i == 0:
+		algo = algo1
+		ecn = ecn1
+	else:	
+		algo = algorest
+		ecn=ecnrest
     	hn.popen("sysctl -w net.ipv4.tcp_ecn=%u" % ecn) 
 	print "%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000 -Z %s" % algo
-	client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000 -Z %s" % algo )
+	client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000 -Z %s" % algo)
 	#client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000")
 
 # Function to compute the median
@@ -268,10 +287,10 @@ def set_red(iface, red_params):
     os.system(cmd)
 
 
-def tcpecn():
+def tcpfair():
     if not os.path.exists(args.dir):
         os.makedirs(args.dir)
-    #os.system("sudo sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong)
+    os.system("sudo sysctl -w net.ipv4.tcp_congestion_control=%s" % args.cong)
 
     #if (args.ecn):
     #   SetECNState()
@@ -323,7 +342,7 @@ def tcpecn():
     # speed of the bottleneck link to the original passed value
     #set_speed(iface, "2Gbit")
     start_receiver(net)
-    start_senders(net,args.ecn,args.cong)
+    start_senders(net,args.ecn,args.ecnrest,args.cong1,args.congrest)
     #start_senders(net,args.ecn)
     sleep(5)
     #set_speed(iface, "%.2fMbit" % args.bw_net)
@@ -367,4 +386,4 @@ def tcpecn():
 
 if __name__ == "__main__":
     #   setLogLevel('debug')
-    tcpecn()
+    tcpfair()

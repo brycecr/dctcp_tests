@@ -22,8 +22,8 @@ def second(lst):
 
 """
 Sample line:
-2.221032535 10.0.0.2:39815 10.0.0.1:5001 32 0x1a2a710c 0x1a2a387c 11 2147483647 14592 85
-1.926909378 10.0.0.1:5001 10.0.0.3:58316 2928 0x364583d4 0x364583d4 10 2147483647 29696 4000 16776192
+0.028963522 10.0.0.1:5001 10.0.0.2:45460 2928 0xde003c0d 0xde003c0d 10 2147483647 29696 0 16776192
+0.029436422 10.0.0.2:45460 10.0.0.1:5001 32 0xb2db77c7 0xb2da2fb7 59 43 16776192 69600 29696
 Where fields are -
 1) time
 2) source ip:port
@@ -34,10 +34,13 @@ Where fields are -
 7) cwnd
 8) ssthresh
 9) send window
+10) smoothed rtt
+11) rcv window
 """
 def parse_file(f):
     times = defaultdict(list)
     cwnd = defaultdict(list)
+    snd_wnd = defaultdict(list)
     srtt = []
     for l in open(f).xreadlines():
         fields = l.strip().split(' ')
@@ -55,16 +58,31 @@ def parse_file(f):
 
         c = int(fields[6])
         cwnd[sport].append(c * 1480 / 1024.0)
-        srtt.append(int(fields[-1]))
-    return times, cwnd
+        srtt.append(int(fields[9]))
+	swnd = int(fields[8])
+	snd_wnd[sport].append(swnd / 1024.0)
+    return times, cwnd, snd_wnd
 
 added = defaultdict(int)
 events = []
 
+def plot_snd_wnd(ax):
+    global events
+    for f in args.files:
+        times, cwnds, swnds = parse_file(f)
+        for port in sorted(swnds.keys()):
+            t = times[port]
+            swnd = swnds[port]
+
+            events += zip(t, [port]*len(t), swnd)
+            ax.plot(t, swnd)
+
+    events.sort()
+
 def plot_cwnds(ax):
     global events
     for f in args.files:
-        times, cwnds = parse_file(f)
+        times, cwnds, swnds = parse_file(f)
         for port in sorted(cwnds.keys()):
             t = times[port]
             cwnd = cwnds[port]
@@ -80,13 +98,13 @@ min_total_cwnd = 10**10
 max_total_cwnd = 0
 totalcwnds = []
 
-m.rc('figure', figsize=(16, 6))
+m.rc('figure', figsize=(16, 12))
 fig = plt.figure()
 plots = 1
 if args.histogram:
     plots = 2
 
-axPlot = fig.add_subplot(1, plots, 1)
+axPlot = fig.add_subplot(2, plots, 1)
 plot_cwnds(axPlot)
 
 for (t,p,c) in events:
@@ -100,12 +118,20 @@ for (t,p,c) in events:
 axPlot.plot(first(cwnd_time), second(cwnd_time), lw=2, label="$\sum_i W_i$")
 axPlot.grid(True)
 #axPlot.legend()
-axPlot.set_xlabel("seconds")
+#axPlot.set_xlabel("seconds")
 axPlot.set_ylabel("cwnd KB")
-axPlot.set_title("TCP congestion window (cwnd) timeseries")
+axPlot.set_title("TCP congestion window (cwnd) and Send Window timeseries")
+
+axSWnd = fig.add_subplot(2,1,2)
+plot_snd_wnd(axSWnd)
+axSWnd.grid(True)
+axSWnd.set_xlabel("seconds")
+axSWnd.set_ylabel("Send Window (KB)")
+#axSWnd.set_title("TCP Send Window")
+
 
 if args.histogram:
-    axHist = fig.add_subplot(1, 2, 2)
+    axHist = fig.add_subplot(2, 2, 2)
     n, bins, patches = axHist.hist(totalcwnds, 50, normed=1, facecolor='green', alpha=0.75)
 
     axHist.set_xlabel("bins (KB)")
