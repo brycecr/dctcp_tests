@@ -199,6 +199,16 @@ parser.add_argument('--ecnrest',
 		    type=int,
                     default="2")
 
+parser.add_argument('--vtcp',
+                    help="Enable Translation Layer for Sender 0?",
+		    type=int,
+                    default="0")
+
+parser.add_argument('--vtcprest',
+                    help="Enable Translation Layer for other Senders?",
+		    type=int,
+                    default="0")
+
 # Expt parameters
 args = parser.parse_args()
 
@@ -243,7 +253,7 @@ def start_receiver(net):
     server = h0.popen("%s -s -w 16m" % CUSTOM_IPERF_PATH)
 
 # Start senders sending traffic to receiver h0
-def start_senders(net,ecn1,ecnrest,algo1,algorest):
+def start_senders(net,ecn1,ecnrest,algo1,algorest,vtcp1,vtcprest):
     h0 = net.getNodeByName('h0')
     for i in range(args.hosts-1):
 	print "Starting iperf client..."
@@ -251,10 +261,15 @@ def start_senders(net,ecn1,ecnrest,algo1,algorest):
 	if i == 0:
 		algo = algo1
 		ecn = ecn1
+		vtcp = vtcp1
 	else:	
 		algo = algorest
 		ecn=ecnrest
+		vtcp=vtcprest
     	hn.popen("sysctl -w net.ipv4.tcp_ecn=%u" % ecn) 
+	if vtcp==1:
+    		hn.popen("sysctl -w net.ipv4.tcp_vtcp=1")
+    	print "VTCP IS:", vtcp
 	print "%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000 -Z %s" % algo
 	client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000 -Z %s" % algo)
 	#client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000")
@@ -336,13 +351,13 @@ def tcpfair():
     iface="s0-eth1"
     set_red(iface,red_settings)
     os.system("tc -d qdisc show dev %s" % iface)
-    os.system("sudo dumpcap -i %s -a duration:37 &" % iface)
+    #os.system("sudo dumpcap -i %s -a duration:100 &" % iface)
     
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value
     #set_speed(iface, "2Gbit")
     start_receiver(net)
-    start_senders(net,args.ecn,args.ecnrest,args.cong1,args.congrest)
+    start_senders(net,args.ecn,args.ecnrest,args.cong1,args.congrest,args.vtcp,args.vtcprest)
     #start_senders(net,args.ecn)
     sleep(5)
     #set_speed(iface, "%.2fMbit" % args.bw_net)

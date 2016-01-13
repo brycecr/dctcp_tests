@@ -317,7 +317,7 @@ def tcpecn():
     iface="s0-eth1"
     set_red(iface,red_settings)
     os.system("tc -d qdisc show dev %s" % iface)
-    os.system("sudo dumpcap -i %s -a duration:37 &" % iface)
+    os.system("sudo dumpcap -i %s -a duration:100 &" % iface)
     
     # Allow for connections to be set up initially and then revert back the
     # speed of the bottleneck link to the original passed value

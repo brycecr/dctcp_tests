@@ -3,17 +3,17 @@
 # Note: Mininet must be run as root.  So invoke this shell script
 # using sudo.
 
-time=20
+time=60
 bwnet=10
-bwhost=12
+bwhost=10
 delay=0.25
 
 # Red settings (for DCTCP)
 dctcp_red_limit=1000000
-dctcp_red_min=90000
-dctcp_red_max=90001
+dctcp_red_min=45000
+dctcp_red_max=45001
 dctcp_red_avpkt=1500
-dctcp_red_burst=61
+dctcp_red_burst=30
 dctcp_red_prob=1
 iperf_port=5001
 iperf=~/iperf-patched/src/iperf
@@ -30,7 +30,7 @@ for qsize in 200; do
     --red_avpkt $dctcp_red_avpkt \
     --red_burst $dctcp_red_burst \
     --red_prob $dctcp_red_prob \
-    --ecn 1 --ecnrest 1 \
+    --ecn 1 --ecnrest 1 --vtcp 1 --vtcprest 0 \
     --red 1 \
     --iperf $iperf -k 0 -n 3
     ./bin/python plot_tcpprobe.py -f $dir1/cwnd.txt -o $dir1/cwnd-iperf.png -p $iperf_port

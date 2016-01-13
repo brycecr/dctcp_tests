@@ -115,7 +115,7 @@ for (t,p,c) in events:
     added[p] = c
     totalcwnds.append(total_cwnd)
 
-axPlot.plot(first(cwnd_time), second(cwnd_time), lw=2, label="$\sum_i W_i$")
+#axPlot.plot(first(cwnd_time), second(cwnd_time), lw=2, label="$\sum_i W_i$")
 axPlot.grid(True)
 #axPlot.legend()
 #axPlot.set_xlabel("seconds")
