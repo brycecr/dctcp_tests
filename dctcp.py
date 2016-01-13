@@ -189,7 +189,7 @@ parser.add_argument('--cong',
 # Expt parameters
 args = parser.parse_args()
 
-CUSTOM_IPERF_PATH = args.iperf
+CUSTOM_IPERF_PATH = '/usr/bin/iperf'
 assert(os.path.exists(CUSTOM_IPERF_PATH))
 
 if not os.path.exists(args.dir):
