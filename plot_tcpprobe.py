@@ -83,12 +83,17 @@ def plot_cwnds(ax):
     global events
     for f in args.files:
         times, cwnds, swnds = parse_file(f)
+	counter = 0
         for port in sorted(cwnds.keys()):
             t = times[port]
-            cwnd = cwnds[port]
+	    if counter == 0:
+            	wnd = cwnds[port]
+	    else:
+		wnd = swnds[port]
+	    counter += 1
 
-            events += zip(t, [port]*len(t), cwnd)
-            ax.plot(t, cwnd)
+            events += zip(t, [port]*len(t), wnd)
+            ax.plot(t, wnd)
 
     events.sort()
 total_cwnd = 0

@@ -10,10 +10,10 @@ delay=0.25
 
 # Red settings (for DCTCP)
 dctcp_red_limit=1000000
-dctcp_red_min=45000
-dctcp_red_max=45001
+dctcp_red_min=90000
+dctcp_red_max=90001
 dctcp_red_avpkt=1500
-dctcp_red_burst=30
+dctcp_red_burst=61
 dctcp_red_prob=1
 iperf_port=5001
 iperf=~/iperf-patched/src/iperf
