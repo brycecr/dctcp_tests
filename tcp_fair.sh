@@ -3,7 +3,7 @@
 # Note: Mininet must be run as root.  So invoke this shell script
 # using sudo.
 
-time=12
+time=20
 bwnet=10
 bwhost=12
 delay=0.25
@@ -30,8 +30,8 @@ for qsize in 200; do
     --red_avpkt $dctcp_red_avpkt \
     --red_burst $dctcp_red_burst \
     --red_prob $dctcp_red_prob \
-    --ecn 1 --ecnrest 0 \
-    --red 0 \
+    --ecn 1 --ecnrest 1 \
+    --red 1 \
     --iperf $iperf -k 0 -n 3
     ./bin/python plot_tcpprobe.py -f $dir1/cwnd.txt -o $dir1/cwnd-iperf.png -p $iperf_port
     ./bin/python plot_queue.py -f $dir1/q.txt --legend "tcp-w/ecn"  -o \

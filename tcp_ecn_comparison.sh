@@ -24,7 +24,7 @@ for qsize in 200; do
     rm -rf tcpecnbb-q$qsize
     dirf=tcpgraphs-q$qsize
     dir1=tcpecnbb-q$qsize
-    python tcpecn.py --cong cubic --delay $delay -b $bwnet -B $bwhost -d $dir1 --maxq $qsize -t $time \
+    ./bin/python tcpecn.py --cong cubic --delay $delay -b $bwnet -B $bwhost -d $dir1 --maxq $qsize -t $time \
     --red_limit $dctcp_red_limit \
     --red_min $dctcp_red_min \
     --red_max $dctcp_red_max \
@@ -35,7 +35,7 @@ for qsize in 200; do
     --red 1  \
     --iperf $iperf -k 0 -n 2
     dir2=tcpbb-q$qsize
-    python tcpecn.py --cong reno --delay $delay -b $bwnet -d $dir2 -B $bwhost --maxq $qsize -t $time \
+    ./bin/python tcpecn.py --cong reno --delay $delay -b $bwnet -d $dir2 -B $bwhost --maxq $qsize -t $time \
      --red_limit $dctcp_red_limit \
     --red_min $dctcp_red_min \
     --red_max $dctcp_red_max \
@@ -43,10 +43,10 @@ for qsize in 200; do
     --red_burst $dctcp_red_burst \
     --red_prob $dctcp_red_prob \
     --ecn 0 --red 1 --iperf $iperf -k 0 -n 2
-    python plot_tcpprobe.py -f $dir1/cwnd.txt -o $dir1/cwnd-iperf.png -p $iperf_port
-    python plot_tcpprobe.py -f $dir2/cwnd.txt -o $dir2/cwnd-iperf.png -p $iperf_port
-    python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend "tcp-w/ecn" tcp -o \
+    ./bin/python plot_tcpprobe.py -f $dir1/cwnd.txt -o $dir1/cwnd-iperf.png -p $iperf_port
+    ./bin/python plot_tcpprobe.py -f $dir2/cwnd.txt -o $dir2/cwnd-iperf.png -p $iperf_port
+    ./bin/python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend "tcp-w/ecn" tcp -o \
     $dirf/tcp_ecn_queue.png
     #rm -rf $dir1 $dir2
-    #python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png
+    #./bin/python plot_ping.py -f $dir/ping.txt -o $dir/rtt.png
 done
