@@ -209,6 +209,11 @@ parser.add_argument('--vtcprest',
 		    type=int,
                     default="0")
 
+parser.add_argument('--split',
+			help="number of hosts that have config 1 vs 2",
+			type=int,
+			default=None)
+
 # Expt parameters
 args = parser.parse_args()
 
@@ -253,12 +258,12 @@ def start_receiver(net):
     server = h0.popen("%s -s -w 16m" % CUSTOM_IPERF_PATH)
 
 # Start senders sending traffic to receiver h0
-def start_senders(net,ecn1,ecnrest,algo1,algorest,vtcp1,vtcprest):
+def start_senders(net,ecn1,ecnrest,algo1,algorest,vtcp1,vtcprest,split):
     h0 = net.getNodeByName('h0')
     for i in range(args.hosts-1):
 	print "Starting iperf client..."
 	hn = net.getNodeByName('h%d' %(i+1))
-	if i == 0:
+	if i == 0 or (split and i < split):
 		algo = algo1
 		ecn = ecn1
 		vtcp = vtcp1
@@ -357,7 +362,7 @@ def tcpfair():
     # speed of the bottleneck link to the original passed value
     #set_speed(iface, "2Gbit")
     start_receiver(net)
-    start_senders(net,args.ecn,args.ecnrest,args.cong1,args.congrest,args.vtcp,args.vtcprest)
+    start_senders(net,args.ecn,args.ecnrest,args.cong1,args.congrest,args.vtcp,args.vtcprest,args.split)
     #start_senders(net,args.ecn)
     sleep(5)
     #set_speed(iface, "%.2fMbit" % args.bw_net)
