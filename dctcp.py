@@ -176,6 +176,10 @@ parser.add_argument('--iperf',
                     help="Path to custom iperf",
                     required=True)
 
+parser.add_argument('--vtcp',
+                    type=int,
+                    default=None)
+
 ############################
 # Linux uses CUBIC-TCP by default that doesn't have the usual sawtooth
 # behaviour.  For those who are curious, invoke this script with
@@ -237,12 +241,13 @@ def start_receiver(net, ecn):
 
 
 # Start senders sending traffic to receiver h0
-def start_senders(net, ecn):
+def start_senders(net, ecn, vtcp):
     h0 = net.getNodeByName('h0')
     for i in range(args.hosts - 1):
         print "Starting iperf client..."
         hn = net.getNodeByName('h%d' % (i + 1))
         hn.popen("sysctl -w net.ipv4.tcp_ecn=%u" % ecn)
+        hn.popen("sysctl -w net.ipv4.tcp_vtcp=%u" % vtcp)
         client = hn.popen("%s -c " % CUSTOM_IPERF_PATH + h0.IP() + " -t 1000")
 
 
@@ -321,8 +326,10 @@ def dctcp():
     iface = "s0-eth1"
     #set_red(iface, red_settings)
     eecn = 0
+    vtcp = 0
     if (args.dctcp):
 	eecn = 1
+	vtcp = 1
     print (topo.port('s0', 'h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
@@ -334,7 +341,7 @@ def dctcp():
     print ("part 1")
     start_receiver(net, eecn)
     print ("part 2")
-    start_senders(net, eecn)
+    start_senders(net, eecn, vtcp)
     print ("part 3")
    # sleep(5)
     #set_speed(iface, "%.2fMbit" % args.bw_net)

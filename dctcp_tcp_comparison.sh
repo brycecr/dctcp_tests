@@ -30,12 +30,12 @@ for qsize in 200; do
     --red_avpkt $dctcp_red_avpkt \
     --red_burst $dctcp_red_burst \
     --red_prob $dctcp_red_prob \
-    --dctcp 1 \
+    --dctcp 1 --vtcp 1 \
     --red 0 \
     --iperf $iperf -k 0 -n 3
     dir2=tcpbb-q$qsize
     ./bin/python dctcp.py --delay $delay -b $bwnet -B $bwnet -d $dir2 --maxq $qsize -t $time \
-    --dctcp 0 --red 0 --iperf $iperf -k 0 -n 3
+    --dctcp 0 --red 0 --vtcp 0 --iperf $iperf -k 0 -n 3
     python plot_tcpprobe.py -f $dir1/cwnd.txt -o $dirf/cwnd-1-iperf.png -p $iperf_port
     python plot_tcpprobe.py -f $dir2/cwnd.txt -o $dirf/cwnd-2-iperf.png -p $iperf_port
     ./bin/python plot_queue.py -f $dir1/q.txt $dir2/q.txt --legend tcpFakEcn tcp -o \
