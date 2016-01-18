@@ -326,10 +326,11 @@ def dctcp():
     iface = "s0-eth1"
     #set_red(iface, red_settings)
     eecn = 0
-    vtcp = 0
     if (args.dctcp):
 	eecn = 1
-	vtcp = 1
+    vtcp=0
+    if (args.vtcp):
+        vtcp=1
     print (topo.port('s0', 'h0'))
     print (net.getNodeByName('s0').intf('lo'))
     print ("I just printed the first switch")
