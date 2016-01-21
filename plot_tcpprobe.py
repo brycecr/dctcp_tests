@@ -86,11 +86,11 @@ def plot_cwnds(ax):
 	counter = 0
         for port in sorted(cwnds.keys()):
             t = times[port]
-	    if counter == 0:
-            	wnd = cwnds[port]
-	    else:
-		wnd = swnds[port]
-	    counter += 1
+	    #if counter == 0:
+	    wnd = cwnds[port]
+	    #else:
+	#	wnd = swnds[port]
+	    #counter += 1
 
             events += zip(t, [port]*len(t), wnd)
             ax.plot(t, wnd)
