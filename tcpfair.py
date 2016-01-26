@@ -199,6 +199,11 @@ parser.add_argument('--ecnrest',
 		    type=int,
                     default="2")
 
+parser.add_argument('--ecnrest2',
+                    help="Congestion control algorithm to use",
+		    type=int,
+                    default="0")
+
 parser.add_argument('--vtcp',
                     help="Enable Translation Layer for Sender 0?",
 		    type=int,
@@ -209,7 +214,17 @@ parser.add_argument('--vtcprest',
 		    type=int,
                     default="0")
 
+parser.add_argument('--vtcprest2',
+                    help="Enable Translation Layer for other Senders?",
+		    type=int,
+                    default="0")
+
 parser.add_argument('--split',
+			help="number of hosts that have config 1 vs 2",
+			type=int,
+			default=None)
+
+parser.add_argument('--split2',
 			help="number of hosts that have config 1 vs 2",
 			type=int,
 			default=None)
@@ -258,7 +273,7 @@ def start_receiver(net):
     server = h0.popen("%s -s -w 16m" % CUSTOM_IPERF_PATH)
 
 # Start senders sending traffic to receiver h0
-def start_senders(net,ecn1,ecnrest,algo1,algorest,vtcp1,vtcprest,split):
+def start_senders(net,ecn1,ecnrest,algo1,algorest,vtcp1,vtcprest,split,vtcprest2,ecnrest2,split2):
     h0 = net.getNodeByName('h0')
     for i in range(args.hosts-1):
 	print "Starting iperf client..."
@@ -267,10 +282,14 @@ def start_senders(net,ecn1,ecnrest,algo1,algorest,vtcp1,vtcprest,split):
 		algo = algo1
 		ecn = ecn1
 		vtcp = vtcp1
-	else:	
+	elif split2==None or i < split2:
 		algo = algorest
 		ecn=ecnrest
 		vtcp=vtcprest
+	else:
+		algo=algo1
+		ecn=ecnrest2
+		vtcp=vtcprest2
     	hn.popen("sysctl -w net.ipv4.tcp_ecn=%u" % ecn) 
 	if vtcp==1:
     		hn.popen("sysctl -w net.ipv4.tcp_vtcp=1")
@@ -362,7 +381,7 @@ def tcpfair():
     # speed of the bottleneck link to the original passed value
     #set_speed(iface, "2Gbit")
     start_receiver(net)
-    start_senders(net,args.ecn,args.ecnrest,args.cong1,args.congrest,args.vtcp,args.vtcprest,args.split)
+    start_senders(net,args.ecn,args.ecnrest,args.cong1,args.congrest,args.vtcp,args.vtcprest,args.split,args.vtcprest2,args.ecnrest2,args.split2)
     #start_senders(net,args.ecn)
     sleep(5)
     #set_speed(iface, "%.2fMbit" % args.bw_net)
